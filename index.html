@@ -1,38 +1,266 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BASO MIREA — Minecraft сервер</title>
-  <style>
-    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-           background:#14161a; color:#e8e8e8; font-family:system-ui,sans-serif; text-align:center; }
-    .card { max-width:480px; padding:32px; }
-    h1 { margin:0 0 8px; }
-    .ip { display:inline-block; margin:20px 0; padding:12px 20px; background:#23262d;
-          border-radius:8px; font-family:monospace; font-size:1.2em; cursor:pointer; }
-    a { color:#5ec27a; }
-    ul { text-align:left; display:inline-block; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BASO MIREA: Minecraft сервер</title>
+<meta name="description" content="Minecraft сервер baso-mirea.ru, версия 26.3">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛏️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky-top: #7fc4f2;
+    --sky-bottom: #d4effc;
+    --grass: #5fa83a;
+    --grass-dark: #4c8f2e;
+    --dirt: #8a5a38;
+    --dirt-dark: #765030;
+    --ink: #1d2a1a;
+    --panel: #fff9e8;
+    --accent: #e8672a;
+    --accent-dark: #b94b17;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Rubik", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(var(--sky-top), var(--sky-bottom) 70%);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    font-family: "Silkscreen", "Courier New", monospace;
+    font-weight: 700;
+    font-size: clamp(48px, 13vw, 132px);
+    line-height: .92;
+    margin: 0;
+    letter-spacing: 0;
+    color: #fff;
+    text-shadow:
+      0 6px 0 var(--ink),
+      4px 4px 0 var(--ink), -4px 4px 0 var(--ink),
+      4px -4px 0 var(--ink), -4px -4px 0 var(--ink),
+      0 -4px 0 var(--ink), 0 10px 0 rgba(29,42,26,.25);
+  }
+  h1 span { display: block; }
+  h1 .second { color: #ffd84a; }
+
+  .lead {
+    margin: 36px 0 28px;
+    font-size: clamp(17px, 2.4vw, 21px);
+    font-weight: 500;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    padding: 22px 24px;
+    width: min(100%, 520px);
+  }
+  .addr-label { margin: 0 0 6px; font-size: 14px; color: #5b5a48; }
+  .addr {
+    font-family: "Silkscreen", monospace;
+    font-weight: 700;
+    font-size: clamp(22px, 5.5vw, 34px);
+    margin: 0 0 18px;
+    word-break: break-all;
+  }
+
+  .btn {
+    appearance: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: "Silkscreen", monospace;
+    font-weight: 700;
+    font-size: 22px;
+    padding: 16px 20px;
+    color: #fff;
+    background: var(--accent);
+    border: 4px solid var(--ink);
+    box-shadow: inset 0 -6px 0 var(--accent-dark);
+    transition: transform .08s ease;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active { transform: translateY(3px); box-shadow: inset 0 -3px 0 var(--accent-dark); }
+  .btn:focus-visible { outline: 4px solid #1b6fd1; outline-offset: 3px; }
+  .btn.done { background: var(--grass); box-shadow: inset 0 -6px 0 var(--grass-dark); }
+
+  .steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    text-align: left;
+    font-size: 15.5px;
+    line-height: 1.5;
+    transition: max-height .35s ease, opacity .35s ease, margin .35s ease;
+  }
+  .steps.open { max-height: 200px; opacity: 1; margin-top: 18px; }
+  .steps li { padding-left: 26px; position: relative; margin-bottom: 4px; }
+  .steps li::before {
+    content: ""; position: absolute; left: 0; top: .5em;
+    width: 12px; height: 12px; background: var(--grass); border: 2px solid var(--ink);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .chip {
+    background: var(--panel);
+    border: 3px solid var(--ink);
+    padding: 8px 14px;
+    font-weight: 500;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chip b { font-family: "Silkscreen", monospace; font-size: 17px; }
+  .dot { width: 12px; height: 12px; background: #9a9a8a; border: 2px solid var(--ink); }
+  .dot.on { background: #43d047; }
+  .dot.off { background: #e04a3a; }
+
+  .ground {
+    height: 120px;
+    position: relative;
+    z-index: 0;
+    background:
+      linear-gradient(var(--grass) 0 32px, transparent 32px),
+      conic-gradient(var(--dirt-dark) 25%, var(--dirt) 0 50%, var(--dirt-dark) 0 75%, var(--dirt) 0) 0 32px / 48px 48px;
+    border-top: 4px solid var(--ink);
+  }
+  .ground::before {
+    content: "";
+    position: absolute; left: 0; right: 0; top: 0; height: 32px;
+    background: conic-gradient(var(--grass-dark) 25%, var(--grass) 0 50%, var(--grass-dark) 0 75%, var(--grass) 0) 0 0 / 32px 32px;
+  }
+
+  .cloud {
+    position: absolute;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.0);
+    opacity: .95;
+  }
+  .cloud.c1 { top: 12%; left: 6%; width: 170px; height: 36px; box-shadow: 40px -28px 0 #fff, 90px -28px 0 #fff; animation: drift 90s linear infinite; }
+  .cloud.c2 { top: 26%; right: 8%; width: 130px; height: 30px; box-shadow: -30px -24px 0 #fff, -70px -24px 0 #fff; animation: drift 120s linear infinite reverse; }
+  @keyframes drift { from { transform: translateX(-20px); } to { transform: translateX(40px); } }
+  @media (prefers-reduced-motion: reduce) { .cloud { animation: none; } .steps { transition: none; } }
+
+  @media (max-width: 520px) {
+    .panel { padding: 18px 16px; box-shadow: 6px 6px 0 var(--ink); }
+    .cloud.c2 { display: none; }
+  }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>BASO MIREA</h1>
-    <p>Minecraft сервер</p>
-    <div class="ip" id="ip" onclick="copyIp()">baso-mirea.ru</div>
-    <p id="hint">Нажми на адрес, чтобы скопировать</p>
-    <p>Версия: <b>1.21</b></p>
-    <ul>
-      <li>Не гриферить</li>
-      <li>Не использовать читы</li>
-    </ul>
-    <p><a href="https://t.me/твой_канал">Наш Telegram</a></p>
-  </div>
-  <script>
-    function copyIp() {
-      navigator.clipboard.writeText("baso-mirea.ru");
-      document.getElementById("hint").textContent = "Скопировано!";
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+
+  <main>
+    <h1><span>BASO</span><span class="second">MIREA</span></h1>
+    <p class="lead">Заходи на сервер. Адрес один, версия 26.3.</p>
+
+    <div class="panel">
+      <p class="addr-label">Адрес сервера</p>
+      <p class="addr" id="addr">baso-mirea.ru</p>
+      <button class="btn" id="connect" type="button">Подключиться</button>
+      <ul class="steps" id="steps" aria-live="polite">
+        <li>Адрес скопирован.</li>
+        <li>Открой Minecraft Java Edition 26.3.</li>
+        <li>Сетевая игра → Добавить сервер.</li>
+        <li>Вставь адрес и нажми «Готово».</li>
+      </ul>
+    </div>
+
+    <div class="meta">
+      <div class="chip">Версия <b>26.3</b></div>
+      <div class="chip" id="status"><span class="dot" id="dot"></span><span id="statusText">Проверяю сервер</span></div>
+    </div>
+  </main>
+
+  <div class="ground" aria-hidden="true"></div>
+
+<script>
+  var ADDRESS = "baso-mirea.ru";
+  var btn = document.getElementById("connect");
+  var steps = document.getElementById("steps");
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
     }
-  </script>
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy") ? resolve() : reject(); }
+      catch (e) { reject(e); }
+      document.body.removeChild(ta);
+    });
+  }
+
+  btn.addEventListener("click", function () {
+    copyText(ADDRESS).then(function () {
+      btn.textContent = "Скопировано";
+      btn.classList.add("done");
+      steps.firstElementChild.textContent = "Адрес скопирован.";
+    }).catch(function () {
+      steps.firstElementChild.textContent = "Скопируй адрес вручную: " + ADDRESS;
+    }).then(function () {
+      steps.classList.add("open");
+      setTimeout(function () {
+        btn.textContent = "Подключиться";
+        btn.classList.remove("done");
+      }, 2500);
+    });
+  });
+
+  // Статус сервера
+  var dot = document.getElementById("dot");
+  var statusText = document.getElementById("statusText");
+  fetch("https://api.mcsrvstat.us/3/" + ADDRESS)
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.online) {
+        dot.className = "dot on";
+        var n = d.players && typeof d.players.online === "number" ? d.players.online : 0;
+        statusText.textContent = "Онлайн: " + n;
+      } else {
+        dot.className = "dot off";
+        statusText.textContent = "Сервер выключен";
+      }
+    })
+    .catch(function () {
+      document.getElementById("status").style.display = "none";
+    });
+</script>
 </body>
 </html>
